@@ -1,0 +1,469 @@
+- uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+
+  - name: Create project files
+    run: |
+      mkdir -p app/src/main/java/com/hoosha/qx10pro app/src/main/res/layout app/src/main/res/values
+      cat > settings.gradle << 'EOF'
+      pluginManagement {
+          repositories {
+              google()
+              mavenCentral()
+              gradlePluginPortal()
+          }
+      }
+      dependencyResolutionManagement {
+          repositories {
+              google()
+              mavenCentral()
+          }
+      }
+      rootProject.name = "QX10Pro"
+      include(":app")
+      EOF
+      cat > build.gradle << 'EOF'
+      plugins {
+          id("com.android.application") version "8.5.2" apply false
+          id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+      }
+      EOF
+      cat > gradle.properties << 'EOF'
+      org.gradle.jvmargs=-Xmx2048m
+      android.useAndroidX=true
+      EOF
+      cat > app/build.gradle << 'EOF'
+      plugins {
+          id("com.android.application")
+          id("org.jetbrains.kotlin.android")
+      }
+      android {
+          namespace = "com.hoosha.qx10pro"
+          compileSdk = 34
+          defaultConfig {
+              applicationId = "com.hoosha.qx10pro"
+              minSdk = 26
+              targetSdk = 34
+              versionCode = 1
+              versionName = "1.0"
+          }
+          compileOptions {
+              sourceCompatibility = JavaVersion.VERSION_17
+              targetCompatibility = JavaVersion.VERSION_17
+          }
+          kotlinOptions { jvmTarget = "17" }
+      }
+      dependencies {
+          implementation("androidx.core:core-ktx:1.13.1")
+          implementation("androidx.appcompat:appcompat:1.7.0")
+          implementation("com.google.android.material:material:1.12.0")
+      }
+      EOF
+      cat > app/src/main/AndroidManifest.xml << 'EOF'
+      <?xml version="1.0" encoding="utf-8"?>
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          <uses-permission android:name="android.permission.INTERNET" />
+          <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+          <application android:label="QX10 Pro" android:theme="@style/Theme.QX10Pro">
+              <activity android:name=".MainActivity" android:exported="true">
+                  <intent-filter>
+                      <action android:name="android.intent.action.MAIN" />
+                      <category android:name="android.intent.category.LAUNCHER" />
+                  </intent-filter>
+              </activity>
+          </application>
+      </manifest>
+      EOF
+      cat > app/src/main/res/values/themes.xml << 'EOF'
+      <?xml version="1.0" encoding="utf-8"?>
+      <resources>
+          <style name="Theme.QX10Pro" parent="Theme.Material3.Dark.NoActionBar">
+              <item name="android:statusBarColor">#0E0E12</item>
+              <item name="android:windowBackground">#0E0E12</item>
+          </style>
+      </resources>
+      EOF
+      cat > app/src/main/res/layout/activity_main.xml << 'EOF'
+      <?xml version="1.0" encoding="utf-8"?>
+      <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:fillViewport="true"
+          android:background="#0E0E12">
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="12dp">
+              <TextView
+                  android:id="@+id/statusText"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Status: disconnected"
+                  android:textColor="#FFD54F"
+                  android:textSize="14sp" />
+              <Button
+                  android:id="@+id/btnConnect"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Connect"
+                  android:layout_marginTop="8dp" />
+              <ImageView
+                  android:id="@+id/liveView"
+                  android:layout_width="match_parent"
+                  android:layout_height="260dp"
+                  android:scaleType="fitCenter"
+                  android:background="#000000"
+                  android:layout_marginTop="8dp" />
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_marginTop="8dp">
+                  <Button
+                      android:id="@+id/btnShutter"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="60dp"
+                      android:text="Photo" />
+                  <Button
+                      android:id="@+id/btnBurst"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="60dp"
+                      android:layout_marginStart="8dp"
+                      android:text="Burst" />
+              </LinearLayout>
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_marginTop="8dp">
+                  <Button
+                      android:id="@+id/btnZoomOut"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="wrap_content"
+                      android:text="Zoom -" />
+                  <Button
+                      android:id="@+id/btnZoomIn"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:text="Zoom +" />
+              </LinearLayout>
+              <TextView
+                  android:id="@+id/bokehLabel"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Bokeh (aperture): f/3.3"
+                  android:textColor="#FFFFFF"
+                  android:layout_marginTop="12dp" />
+              <SeekBar
+                  android:id="@+id/bokehSeek"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:max="6" />
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="ISO"
+                  android:textColor="#FFFFFF"
+                  android:layout_marginTop="12dp" />
+              <Spinner
+                  android:id="@+id/spinIso"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content" />
+              <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Shutter Speed"
+                  android:textColor="#FFFFFF"
+                  android:layout_marginTop="12dp" />
+              <Spinner
+                  android:id="@+id/spinShutter"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content" />
+              <EditText
+                  android:id="@+id/etInterval"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:inputType="number"
+                  android:text="5"
+                  android:hint="Timelapse seconds"
+                  android:layout_marginTop="12dp" />
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_marginTop="8dp">
+                  <Button
+                      android:id="@+id/btnTimelapseStart"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="wrap_content"
+                      android:text="Start Timelapse" />
+                  <Button
+                      android:id="@+id/btnTimelapseStop"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:text="Stop" />
+              </LinearLayout>
+          </LinearLayout>
+      </ScrollView>
+      EOF
+      cat > app/src/main/java/com/hoosha/qx10pro/SonyCamera.kt << 'EOF'
+      package com.hoosha.qx10pro
+
+      import org.json.JSONArray
+      import org.json.JSONObject
+      import java.net.DatagramPacket
+      import java.net.DatagramSocket
+      import java.net.HttpURLConnection
+      import java.net.InetAddress
+      import java.net.URL
+
+      object SonyCamera {
+          var endpoint: String = ""
+
+          fun discover(onResult: (String?) -> Unit) {
+              Thread {
+                  var found: String? = null
+                  try {
+                      val socket = DatagramSocket()
+                      socket.soTimeout = 4000
+                      val msg = ("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 3\r\nST: urn:schemas-sony-com:service:ScalarWebAPI:1\r\n\r\n").toByteArray()
+                      socket.send(DatagramPacket(msg, msg.size, InetAddress.getByName("239.255.255.250"), 1900))
+                      val buf = ByteArray(2048)
+                      val pkt = DatagramPacket(buf, buf.size)
+                      socket.receive(pkt)
+                      val text = String(buf, 0, pkt.length)
+                      val loc = Regex("LOCATION:\\s*(\\S+)", RegexOption.IGNORE_CASE).find(text)?.groupValues?.get(1)
+                      if (loc != null) found = resolveEndpoint(loc)
+                      socket.close()
+                  } catch (_: Exception) { }
+                  onResult(found ?: "http://10.0.0.1:10000/sony/camera")
+              }.start()
+          }
+
+          private fun resolveEndpoint(locationUrl: String): String? {
+              return try {
+                  val c = URL(locationUrl).openConnection() as HttpURLConnection
+                  c.connectTimeout = 4000; c.readTimeout = 4000
+                  val xml = c.inputStream.bufferedReader().use { it.readText() }
+                  c.disconnect()
+                  val base = Regex("<URLBase>(.*?)</URLBase>", RegexOption.IGNORE_CASE).find(xml)?.groupValues?.get(1)?.trim()
+                  val url = if (!base.isNullOrBlank()) base else "http://" + URL(locationUrl).host
+                  if (url.endsWith("/sony/camera")) url else "$url/sony/camera"
+              } catch (_: Exception) { null }
+          }
+
+          fun rpc(method: String, params: JSONArray = JSONArray()): JSONObject? {
+              if (endpoint.isBlank()) return null
+              return try {
+                  val body = JSONObject().put("method", method).put("params", params).put("id", 1).put("version", "1.0")
+                  val c = URL(endpoint).openConnection() as HttpURLConnection
+                  c.requestMethod = "POST"; c.doOutput = true
+                  c.connectTimeout = 6000; c.readTimeout = 15000
+                  c.setRequestProperty("Content-Type", "application/json")
+                  c.outputStream.use { it.write(body.toString().toByteArray()) }
+                  val resp = c.inputStream.bufferedReader().use { it.readText() }
+                  c.disconnect()
+                  JSONObject(resp)
+              } catch (_: Exception) { null }
+          }
+
+          fun startLiveview(): String? = rpc("startLiveview")?.optJSONArray("result")?.optString(0)
+          fun stopLiveview() { rpc("stopLiveview") }
+          fun actTakePicture(): JSONArray? = rpc("actTakePicture")?.optJSONArray("result")?.optJSONArray(0)
+          fun setZoom(direction: String) { rpc("actZoom", JSONArray().put(direction).put("1shot")) }
+          fun setFNumber(f: String): Boolean {
+              rpc("setExposureMode", JSONArray().put("Aperture"))
+              val r = rpc("setFNumber", JSONArray().put(f))
+              return r != null && !r.has("error")
+          }
+          fun setIso(iso: String) {
+              rpc("setExposureMode", JSONArray().put("Program Auto"))
+              rpc("setIsoSpeedRate", JSONArray().put(iso))
+          }
+          fun setShutterSpeed(v: String) {
+              rpc("setExposureMode", JSONArray().put("Shutter"))
+              rpc("setShutterSpeed", JSONArray().put(v))
+          }
+          fun setExposureMode(mode: String) { rpc("setExposureMode", JSONArray().put(mode)) }
+      }
+
+      class LiveviewStream(private val url: String, private val onFrame: (ByteArray) -> Unit) {
+          @Volatile var running = false
+
+          fun start() {
+              running = true
+              Thread {
+                  try {
+                      val c = URL(url).openConnection() as HttpURLConnection
+                      c.connectTimeout = 5000
+                      val input = c.inputStream
+                      val buffer = java.io.ByteArrayOutputStream()
+                      val chunk = ByteArray(4096)
+                      var inJpeg = false
+                      while (running) {
+                          val n = input.read(chunk)
+                          if (n <= 0) break
+                          for (i in 0 until n) {
+                              buffer.write(chunk[i].toInt())
+                              val arr = buffer.toByteArray()
+                              if (!inJpeg && arr.size >= 2 && arr[arr.size - 2] == 0xFF.toByte() && arr[arr.size - 1] == 0xD8.toByte()) {
+                                  inJpeg = true
+                              } else if (inJpeg && arr.size >= 2 && arr[arr.size - 2] == 0xFF.toByte() && arr[arr.size - 1] == 0xD9.toByte()) {
+                                  onFrame(arr.clone())
+                                  buffer.reset()
+                                  inJpeg = false
+                              }
+                          }
+                      }
+                      c.disconnect()
+                  } catch (_: Exception) { }
+              }.start()
+          }
+
+          fun stop() { running = false }
+      }
+      EOF
+      cat > app/src/main/java/com/hoosha/qx10pro/MainActivity.kt << 'EOF'
+      package com.hoosha.qx10pro
+
+      import android.graphics.BitmapFactory
+      import android.os.Bundle
+      import android.widget.*
+      import androidx.appcompat.app.AppCompatActivity
+      import java.util.concurrent.Executors
+      import java.util.concurrent.TimeUnit
+
+      class MainActivity : AppCompatActivity() {
+          private val io = Executors.newSingleThreadExecutor()
+          private var liveview: LiveviewStream? = null
+          @Volatile private var timelapseRunning = false
+          private val fNumbers = listOf("3.3", "3.8", "4.3", "4.8", "5.3", "5.9", "6.7")
+
+          private lateinit var statusText: TextView
+          private lateinit var liveImageView: ImageView
+          private lateinit var bokehLabel: TextView
+
+          override fun onCreate(savedInstanceState: Bundle?) {
+              super.onCreate(savedInstanceState)
+              setContentView(R.layout.activity_main)
+
+              statusText = findViewById(R.id.statusText)
+              liveImageView = findViewById(R.id.liveView)
+              bokehLabel = findViewById(R.id.bokehLabel)
+
+              val isos = arrayOf("AUTO", "100", "200", "400", "800", "1600", "3200")
+              val shutters = arrayOf("AUTO", "30", "15", "8", "4", "2", "1", "1/4", "1/8", "1/15", "1/30", "1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000")
+              findViewById<Spinner>(R.id.spinIso).adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, isos)
+              findViewById<Spinner>(R.id.spinShutter).adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, shutters)
+
+              findViewById<Spinner>(R.id.spinIso).onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                  override fun onItemSelected(p: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
+                      io.execute { SonyCamera.setIso(isos[pos]) }
+                  }
+                  override fun onNothingSelected(p: AdapterView<*>?) {}
+              }
+              findViewById<Spinner>(R.id.spinShutter).onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                  override fun onItemSelected(p: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
+                      if (shutters[pos] != "AUTO") io.execute { SonyCamera.setShutterSpeed(shutters[pos]) }
+                  }
+                  override fun onNothingSelected(p: AdapterView<*>?) {}
+              }
+
+              findViewById<Button>(R.id.btnConnect).setOnClickListener {
+                  statusText.text = "Searching camera..."
+                  SonyCamera.discover { ep ->
+                      runOnUiThread {
+                          SonyCamera.endpoint = ep ?: ""
+                          statusText.text = "Connected: $ep"
+                          openLiveview()
+                      }
+                  }
+              }
+
+              findViewById<Button>(R.id.btnShutter).setOnClickListener {
+                  io.execute { SonyCamera.actTakePicture() }
+                  Toast.makeText(this, "Photo taken", Toast.LENGTH_SHORT).show()
+              }
+
+              findViewById<Button>(R.id.btnBurst).setOnClickListener {
+                  io.execute {
+                      SonyCamera.setExposureMode("Continuous")
+                      SonyCamera.actTakePicture()
+                  }
+              }
+
+              findViewById<Button>(R.id.btnZoomIn).setOnClickListener { io.execute { SonyCamera.setZoom("in") } }
+              findViewById<Button>(R.id.btnZoomOut).setOnClickListener { io.execute { SonyCamera.setZoom("out") } }
+
+              val bokehSeek = findViewById<SeekBar>(R.id.bokehSeek)
+              bokehSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                  override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) {
+                      bokehLabel.text = "Bokeh (aperture): f/${fNumbers.getOrElse(p) { "3.3" }}"
+                  }
+                  override fun onStartTrackingTouch(sb: SeekBar?) {}
+                  override fun onStopTrackingTouch(sb: SeekBar?) {
+                      val f = fNumbers.getOrElse(sb!!.progress) { "3.3" }
+                      io.execute { SonyCamera.setFNumber(f) }
+                  }
+              })
+
+              findViewById<Button>(R.id.btnTimelapseStart).setOnClickListener {
+                  val sec = findViewById<EditText>(R.id.etInterval).text.toString().toLongOrNull() ?: 5L
+                  timelapseRunning = true
+                  io.execute {
+                      while (timelapseRunning) {
+                          SonyCamera.actTakePicture()
+                          try { TimeUnit.SECONDS.sleep(sec) } catch (_: InterruptedException) { break }
+                      }
+                  }
+                  Toast.makeText(this, "Timelapse started", Toast.LENGTH_SHORT).show()
+              }
+              findViewById<Button>(R.id.btnTimelapseStop).setOnClickListener { timelapseRunning = false }
+          }
+
+          private fun openLiveview() {
+              io.execute {
+                  val url = SonyCamera.startLiveview()
+                  if (url == null) {
+                      runOnUiThread { statusText.text = "Liveview error" }
+                      return@execute
+                  }
+                  liveview?.stop()
+                  val stream = LiveviewStream(url) { jpegBytes ->
+                      val bmp = BitmapFactory.decodeByteArray(jpegBytes, 0, jpegBytes.size)
+                      if (bmp != null) runOnUiThread { liveImageView.setImageBitmap(bmp) }
+                  }
+                  liveview = stream
+                  stream.start()
+                  runOnUiThread { statusText.text = "Live view active" }
+              }
+          }
+
+          override fun onDestroy() {
+              super.onDestroy()
+              timelapseRunning = false
+              liveview?.stop()
+              io.shutdown()
+          }
+      }
+      EOF
+
+  - name: Build APK
+    uses: gradle/actions/setup-gradle@v3
+  - run: gradle assembleDebug --no-daemon
+
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: QX10Pro-debug-apk
+      path: app/build/outputs/apk/debug/app-debug.apk
