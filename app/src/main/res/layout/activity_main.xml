@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#0E0E12">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Status Bar & Connect -->
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status: disconnected"
+            android:textColor="#FFD54F"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnConnect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect to Camera"
+            android:layout_marginTop="6dp" />
+
+        <!-- LiveView Container with Touch AF Overlay Frame -->
+        <FrameLayout
+            android:id="@+id/liveViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:layout_marginTop="8dp"
+            android:background="#000000">
+
+            <ImageView
+                android:id="@+id/liveView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter" />
+
+            <!-- Touch AF indicator box -->
+            <View
+                android:id="@+id/focusIndicator"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/focus_box"
+                android:visibility="gone" />
+
+            <!-- Cancel AF Button overlay -->
+            <Button
+                android:id="@+id/btnCancelAf"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textSize="11sp"
+                android:text="Reset AF"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Shutter & Burst Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnShutter"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Take Photo" />
+
+            <Button
+                android:id="@+id/btnBurst"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:layout_marginStart="8dp"
+                android:text="Burst" />
+        </LinearLayout>
+
+        <!-- Zoom Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
+
+            <Button
+                android:id="@+id/btnZoomOut"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Zoom -" />
+
+            <Button
+                android:id="@+id/btnZoomIn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Zoom +" />
+        </LinearLayout>
+
+        <!-- Exposure Compensation (EV) -->
+        <TextView
+            android:id="@+id/evLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Exposure Compensation (EV): ±0.0 EV"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp" />
+
+        <SeekBar
+            android:id="@+id/evSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="12"
+            android:progress="6" />
+
+        <!-- Software Aperture / Bokeh Simulation -->
+        <TextView
+            android:id="@+id/bokehLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aperture / Bokeh: f/3.3 (Max Wide)"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp" />
+
+        <SeekBar
+            android:id="@+id/bokehSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="6"
+            android:progress="0" />
+
+        <!-- Manual ISO & Shutter Speed Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Manual ISO"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/spinIso"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Shutter Speed"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/spinShutter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Timelapse Controls -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Timelapse Interval (seconds)"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etInterval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="5"
+            android:textColor="#FFFFFF"
+            android:hint="Interval in seconds" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/btnTimelapseStart"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Start Timelapse" />
+
+            <Button
+                android:id="@+id/btnTimelapseStop"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Stop Timelapse" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

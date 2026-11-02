@@ -1,0 +1,12 @@
+.gradle/
+build/
+app/build/
+**/build/**
+**/.gradle/**
+*.iml
+.idea/
+local.properties
+.DS_Store
+extracted_app/
+jadx/
+*.zip
